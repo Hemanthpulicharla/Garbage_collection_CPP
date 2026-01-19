@@ -12,17 +12,16 @@ This project implements a **reference-counting garbage collector** using smart p
 
 ## Why This Matters
 ```cpp
-// The Problem: Manual Memory Management
 int* p = new int(19);
-p = new int(21);  // 💥 LEAK! Lost pointer to 19
-p = new int(28);  // 💥 LEAK! Lost pointer to 21
-// We're bleeding memory...
+p = new int(21);  // LEAK..! Lost pointer to 19
+p = new int(28);  // LEAK..! Lost pointer to 21
+// Bleeding memory...
 
-// The Solution: Automatic Garbage Collection
+// The Solution: Garbage Collection
 Pointer<int> p = new int(19);
-p = new int(21);  // ✅ Auto-freed 19
-p = new int(28);  // ✅ Auto-freed 21
-// Memory managed automatically
+p = new int(21);  // Auto-freed 19
+p = new int(28);  // Auto-freed 21
+// Memory managed 
 ```
 
 C++ gives you control. But with great control comes great responsibility—and memory leaks, dangling pointers, and sleepless nights debugging segfaults.
@@ -48,28 +47,28 @@ Pointer<int> p1 = new int(42);  // refcount = 1
 Pointer<int> p2 = p1;           // refcount = 2
 Pointer<int> p3 = p2;           // refcount = 3
 
-// When p3 goes out of scope → refcount = 2 ( this going out of scope thing is defined for C++ when the compiler is crossd this symbol '}')
-// When p2 goes out of scope → refcount = 1
-// When p1 goes out of scope → refcount = 0 → Collected and released 
+// When p3 goes out of scope - refcount = 2 ( this going out of scope thing is defined for C++ when the compiler is crossd this symbol '}')
+// When p2 goes out of scope - refcount = 1
+// When p1 goes out of scope - refcount = 0 -> Collected and released 
 ```
 
 ## The file structure
 ```
 ┌─────────────────────────────────────────┐
 │  Pointer<T>                             │
-│  ├─ addr: T*                            │
-│  ├─ isArray: bool                       │
-│  ├─ arraySize: unsigned                 │
-│  └─ static refContainer: List<Details>  │
+│  - addr: T*                            │
+│  - isArray: bool                       │
+│  - arraySize: unsigned                 │
+│  - static refContainer: List<Details>  │
 └─────────────────────────────────────────┘
          │
-         ├──→ PtrDetails<T>
-         │    ├─ memPtr: T*
-         │    ├─ refcount: unsigned
-         │    ├─ isArray: bool
-         │    └─ arraySize: unsigned
-         │
-         └──→ collect() // Frees zero-ref objects
+         - PtrDetails<T>
+             - memPtr: T*
+             - refcount: unsigned
+             - isArray: bool
+          |  - arraySize: unsigned
+          |
+          |-> collect() // Frees zero-ref objects
 ```
 
 When `refcount` hits zero, `collect()` automatically calls `delete` or `delete[]` as appropriate.
@@ -128,7 +127,7 @@ Max memory occupation: 12 bytes
 
 GREAT JOB! YOU DO NOT HAVE MEMORY LEAKAGE
 ```
-
+![The UI interface](./GC_UI_UX.png)
 ## What I learnt
 
 ### Technically:
